@@ -1,9 +1,20 @@
+/*README
+- freeText and set functions need seeing to: both send back si;ilar error which
+I do not understand.
+*/
+
 #include "text.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <assert.h>
+//#include <assert.h>
+// A replacement for the library assert function.
+void assert( int line, bool b) {
+    if (b) return;
+    printf("The test on line %d fails.\n", line);
+    exit(1);
+}
 
 // Store text using a dynamically allocated character array with a given
 // capacity. Use strlen to find the length of the string contained in the array.
@@ -14,23 +25,37 @@ struct text {
 
 // Create a new text structure, containing a copy of the given string.
 text *newText(char *s) {
-    return NULL;
+    int l = strlen(s) + 1;
+    int m = 24;
+    while (m < l) m = 2*m;
+    text *t = malloc(sizeof(text));
+    t->capacity = m;
+    t->content = malloc(m);
+    t->content = s;
+    return t;
 }
 
 // Free up both the space for the struct and the space for the content.
 // Be careful not to access anything after it has been freed.
 void freeText(text *t) {
+  //free(t->content);
+  //free(t);
 }
 
 int length(text *t) {
-    return 0;
+    int l = strlen(t->content);
+    return l;
 }
 
 char get(text *t, int i) {
-    return '?';
+    assert(__LINE__, (i >= 0) && ( i < t->capacity));
+    char c = t->content[i];
+    return c;
 }
 
 void set(text *t, int i, char c) {
+    assert(__LINE__, (i >= 0) && ( i < t->capacity));
+    t->content[i] = c;
 }
 
 text *copy(text *t) {
@@ -69,47 +94,47 @@ bool like(text *t, char *s) {
 // until it does fit, taking the final null character into account.
 void testNew() {
     text *t = newText("");
-    assert(like(t, ""));
-    assert(t->capacity == 24);
+    assert(__LINE__, like(t, ""));
+    assert(__LINE__, t->capacity == 24);
     freeText(t);
     t = newText("cat");
-    assert(like(t, "cat"));
-    assert(t->capacity == 24);
+    assert(__LINE__, like(t, "cat"));
+    assert(__LINE__, t->capacity == 24);
     freeText(t);
     char *s = "supercalifragilisticexpialidocious";
     t = newText(s);
-    assert(like(t, s));
-    assert(t->capacity == 48);
+    assert(__LINE__, like(t, s));
+    assert(__LINE__, t->capacity == 48);
     freeText(t);
     s = "12345678901234567890123";
     t = newText(s);
-    assert(like(t, s));
-    assert(t->capacity == 24);
+    assert(__LINE__, like(t, s));
+    assert(__LINE__, t->capacity == 24);
     freeText(t);
     s = "123456789012345678901234";
     t = newText(s);
-    assert(like(t, s));
-    assert(t->capacity == 48);
+    assert(__LINE__, like(t, s));
+    assert(__LINE__, t->capacity == 48);
     freeText(t);
     s = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz";
     t = newText(s);
-    assert(like(t, s));
-    assert(t->capacity == 96);
+    assert(__LINE__, like(t, s));
+    assert(__LINE__, t->capacity == 96);
     freeText(t);
 }
 
 void testLength() {
     text *t = newText("cat");
-    assert(length(t) == 3);
+    assert(__LINE__, length(t) == 3);
     freeText(t);
 }
 
 void testGet() {
     text *t = newText("cat");
-    assert(get(t,0) == 'c');
-    assert(get(t,1) == 'a');
-    assert(get(t,2) == 't');
-    assert(get(t,3) == '\0');
+    assert(__LINE__, get(t,0) == 'c');
+    assert(__LINE__, get(t,1) == 'a');
+    assert(__LINE__, get(t,2) == 't');
+    assert(__LINE__, get(t,3) == '\0');
     freeText(t);
 }
 
@@ -117,16 +142,16 @@ void testSet() {
     text *t = newText("cat");
     set(t, 0, 'b');
     set(t, 2, 'r');
-    assert(like(t, "bar"));
+    assert(__LINE__, like(t, "bar"));
     freeText(t);
 }
 
 void testCopy() {
     text *t = newText("cat");
     text *t2 = copy(t);
-    assert(t2 != t);
-    assert(t2->content != t->content);
-    assert(like(t2, "cat"));
+    assert(__LINE__, t2 != t);
+    assert(__LINE__, t2->content != t->content);
+    assert(__LINE__, like(t2, "cat"));
     freeText(t);
     freeText(t2);
 }
@@ -134,13 +159,13 @@ void testCopy() {
 void testCompare() {
     text *t = newText("cat");
     text *t2 = newText("cat");
-    assert(compare(t, t2) == 0);
+    assert(__LINE__, compare(t, t2) == 0);
     text *t3 = newText("car");
-    assert(compare(t, t3) > 0);
+    assert(__LINE__, compare(t, t3) > 0);
     text *t4 = newText("caw");
-    assert(compare(t, t4) < 0);
+    assert(__LINE__, compare(t, t4) < 0);
     text *t5 = newText("catch");
-    assert(compare(t, t5) < 0);
+    assert(__LINE__, compare(t, t5) < 0);
     freeText(t);
     freeText(t2);
     freeText(t3);
@@ -152,12 +177,12 @@ void testAppend() {
     text *t = newText("car");
     text *t2 = newText("pet");
     append(t, t2);
-    assert(like(t, "carpet"));
-    assert(t->capacity == 24);
+    assert(__LINE__, like(t, "carpet"));
+    assert(__LINE__, t->capacity == 24);
     text *t3 = newText("789012345678901234");
     append(t, t3);
-    assert(like(t, "carpet789012345678901234"));
-    assert(t->capacity == 48);
+    assert(__LINE__, like(t, "carpet789012345678901234"));
+    assert(__LINE__, t->capacity == 48);
     freeText(t);
     freeText(t2);
     freeText(t3);
@@ -166,9 +191,9 @@ void testAppend() {
 void testSlice() {
     text *t = newText("carpet");
     text *t2 = slice(t, 0, 3);
-    assert(like(t2, "car"));
+    assert(__LINE__, like(t2, "car"));
     text *t3 = slice(t, 3, 6);
-    assert(like(t3, "pet"));
+    assert(__LINE__, like(t3, "pet"));
     freeText(t);
     freeText(t2);
     freeText(t3);
@@ -177,11 +202,11 @@ void testSlice() {
 void testFind() {
     text *t = newText("carpet");
     text *t2 = newText("car");
-    assert(find(t, t2) == 0);
+    assert(__LINE__, find(t, t2) == 0);
     text *t3 = newText("pet");
-    assert(find(t, t3) == 3);
+    assert(__LINE__, find(t, t3) == 3);
     text *t4 = newText("cat");
-    assert(find(t, t4) == -1);
+    assert(__LINE__, find(t, t4) == -1);
     freeText(t);
     freeText(t2);
     freeText(t3);
